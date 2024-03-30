@@ -40,8 +40,9 @@ export const Login = async (req: Request, res: Response) => {
         name: true,
         email: true,
         role: true,
-        phoneNumber: true,
-        profilePicture: true,
+        jobdesk: true,
+        phone_number: true,
+        profile_picture: true,
       },
     });
 
@@ -50,8 +51,9 @@ export const Login = async (req: Request, res: Response) => {
       name: user?.name,
       email: user?.email,
       role: user?.role,
-      phoneNumber: user?.phoneNumber,
-      profilePicture: user?.profilePicture,
+      jobdesk: user?.jobdesk,
+      phone_number: user?.phone_number,
+      profile_picture: user?.profile_picture,
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET_TOKEN!, {

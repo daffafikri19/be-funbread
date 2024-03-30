@@ -5,7 +5,7 @@ export const GetAllUser = async (req: Request, res: Response) => {
   try {
     const result = await prisma.user.findMany({
       orderBy: {
-        createdAt: "desc",
+        created_at: "desc",
       },
     });
 

@@ -11,6 +11,7 @@
   "author": "DaffaStack",
   "license": "ISC",
   "dependencies": {
+    "@flmngr/flmngr-server-node-express": "^1.5.3",
     "@prisma/client": "^5.11.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",

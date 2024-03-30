@@ -3,7 +3,7 @@ import { prisma } from "../../../lib/prisma";
 import bcrypt from "bcrypt";
 
 export const Register = async (req: Request, res: Response) => {
-  const { name, email, profilePicture, phoneNumber, role, password } = req.body;
+  const { name, email, profile_picture, phone_number, role, password, jobdesk } = req.body;
 
   try {
     const existingName = await prisma.user.findUnique({
@@ -38,8 +38,9 @@ export const Register = async (req: Request, res: Response) => {
       data: {
         name,
         email,
-        profilePicture,
-        phoneNumber,
+        profile_picture,
+        phone_number,
+        jobdesk,
         role,
         password: hashPassword,
       },

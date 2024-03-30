@@ -26,8 +26,8 @@ export const FindUserById = async (req: Request, res: Response) => {
         name: true,
         email: true,
         role: true,
-        phoneNumber: true,
-        profilePicture: true,
+        phone_number: true,
+        profile_picture: true,
       },
     });
 
@@ -71,8 +71,8 @@ export const FindUserByEmail = async (req: Request, res: Response) => {
         name: true,
         email: true,
         role: true,
-        phoneNumber: true,
-        profilePicture: true,
+        phone_number: true,
+        profile_picture: true,
       },
     });
 
@@ -116,8 +116,8 @@ export const FindUserByName = async (req: Request, res: Response) => {
         name: true,
         email: true,
         role: true,
-        phoneNumber: true,
-        profilePicture: true,
+        phone_number: true,
+        profile_picture: true,
       },
     });
 
