@@ -34,11 +34,12 @@ export const VerifyAccess = (
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_TOKEN!);
     VerifyRequest.userData = decodedToken as userData;
-
-    if (VerifyRequest.userData.role !== "Superadmin" || "Owner") {
-      return res.status(401).json({
-        message: "Akses ditolak",
-      });
+    if(process.env.NODE_ENV !== "development") {
+      if (VerifyRequest.userData.role !== "Superadmin" || "Owner") {
+        return res.status(401).json({
+          message: "Akses ditolak",
+        });
+      }
     }
   } catch (error) {
     res.status(401).json({

@@ -34,12 +34,16 @@ model Product {
   name String @db.VarChar(50)
   picture String @db.LongText
   price Int
+  category CategoryProduct?
+  detail DetailProduct?
   created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
 }
 
 model CategoryProduct {
   id Int @id @unique @default(autoincrement())
+  product_id String? @unique
+  product Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
   label String @db.VarChar(50)
   created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
@@ -47,6 +51,8 @@ model CategoryProduct {
 
 model DetailProduct {
   id Int @id @unique @default(autoincrement())
+  product_id String? @unique
+  product Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
   production_date DateTime
   expiry_date DateTime
   age Int
