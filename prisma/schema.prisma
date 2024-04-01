@@ -24,6 +24,7 @@ model User {
   role UserRoles @default(Worker)
   password String 
   jobdesk String @db.VarChar(30)
+  refresh_token String? @db.LongText
   created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
 }
@@ -34,28 +35,40 @@ model Product {
   name String @db.VarChar(50)
   picture String @db.LongText
   price Int
-  category CategoryProduct?
-  detail DetailProduct?
+  category_id Int @unique
+  category CategoryProduct @relation(fields: [category_id], references: [id])
+  old_stok OldStok[]
+  new_stok NewStok?
   created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
+}
+
+model OldStok {
+  id Int @id @unique @default(autoincrement())
+  product_id String @unique
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  production_date DateTime
+  expiry_date DateTime
+  age Int
+  total Int
+}
+
+model NewStok {
+  id Int @id @unique @default(autoincrement())
+  product_id String @unique
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  production_date DateTime
+  expiry_date DateTime
+  age Int
+  total Int
 }
 
 model CategoryProduct {
   id Int @id @unique @default(autoincrement())
-  product_id String? @unique
-  product Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product Product[]
   label String @db.VarChar(50)
   created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
-}
-
-model DetailProduct {
-  id Int @id @unique @default(autoincrement())
-  product_id String? @unique
-  product Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  production_date DateTime
-  expiry_date DateTime
-  age Int
 }
 
 enum UserRoles {

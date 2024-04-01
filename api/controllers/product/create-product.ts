@@ -7,14 +7,11 @@ export const CreateNewProduct = async (req: Request, res: Response) => {
     product_code,
     picture,
     price,
-    category_id,
-    production_date,
-    expiry_date,
-    age,
+    category_id
   } = req.body;
 
   try {
-    await prisma.product.create({
+   const result =  await prisma.product.create({
       data: {
         name,
         product_code,
@@ -24,23 +21,21 @@ export const CreateNewProduct = async (req: Request, res: Response) => {
           connect: {
             id: category_id,
           },
-        },
-        detail: {
-          create: {
-            production_date,
-            expiry_date,
-            age,
-          },
-        },
+        }
       },
     });
+
+    return res.status(201).json({
+      message: "Berhasil membuat produk",
+      data: result
+    })
   } catch (error: any) {
     return res.status(500).json({
-      message: "Internal server error",
+      message: "Terjadi kesalahan server saat membuat produk",
       data: {
         errorMessage: error.message,
-        error: error,
-      },
+        error: error
+      }
     });
   }
 };

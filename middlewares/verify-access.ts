@@ -8,6 +8,7 @@ interface userData {
   profilePicture: string | null;
   phoneNumber: string | null;
   role: string | any;
+  jobdesk: string;
 }
 
 interface VerifyAccessRequest extends Request {
@@ -35,8 +36,8 @@ export const VerifyAccess = (
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_TOKEN!);
     VerifyRequest.userData = decodedToken as userData;
     if(process.env.NODE_ENV !== "development") {
-      if (VerifyRequest.userData.role !== "Superadmin" || "Owner") {
-        return res.status(401).json({
+      if (VerifyRequest.userData.role !== "Owner") {
+        return res.status(403).json({
           message: "Akses ditolak",
         });
       }

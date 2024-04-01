@@ -8,8 +8,7 @@ export const getProduct = async (req: Request, res: Response) => {
         created_at: "desc",
       },
       include: {
-        category: true,
-        detail: true
+        category: true
       }
     });
 
@@ -36,8 +35,7 @@ export const getProductById = async (req: Request, res: Response) => {
         id,
       },
       include: {
-        category: true,
-        detail: true
+        category: true
       }
     });
     return res.status(200).json({
@@ -63,8 +61,7 @@ export const getProductByProductCode = async (req: Request, res: Response) => {
         product_code,
       },
       include: {
-        category: true,
-        detail: true
+        category: true
       }
     });
     return res.status(200).json({

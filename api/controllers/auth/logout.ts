@@ -2,21 +2,34 @@ import { prisma } from "../../../lib/prisma";
 import { Request, Response } from "express";
 
 export const Logout = async (req: Request, res: Response) => {
-  const { id } = req.body;
+  const refreshToken = req.cookies.refreshToken;
+  if(!refreshToken) {
+    return res.sendStatus(204)
+  }
 
-  try {
-    const existingAccount = await prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!existingAccount) {
-      return res.status(404).json({
-        message: "Akun tidak ditemukan",
-      });
+  const user = await prisma.user.findFirst({
+    where: {
+      refresh_token: refreshToken
     }
+  });
 
+  if(!user) {
+    return res.sendStatus(401)
+  }
+
+  const userId = user.id;
+  
+  try {
+    await prisma.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        refresh_token: null
+      },
+    })
+
+    res.clearCookie('refreshToken');
     return res.status(200).json({
       message: "Berhasil Logout",
       data: {},

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 interface userData {
   id: string;
@@ -8,6 +8,7 @@ interface userData {
   profilePicture: string | null;
   phoneNumber: string | null;
   role: string | any;
+  jobdesk: string;
 }
 
 interface VerifyTokenRequest extends Request {
@@ -24,7 +25,7 @@ export const VerifyToken = (
 
   if (!authorization) {
     return res.status(403).json({
-      message: "Token autentikasi tidak ada",
+      message: "Akses dilarang",
       data: {},
     });
   }
@@ -32,14 +33,17 @@ export const VerifyToken = (
   const token = authorization.split(" ")[1];
 
   try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET_TOKEN!);
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
     VerifyRequest.userData = decodedToken as userData;
-  } catch (error) {
-    res.status(401).json({
+  } catch (error : any) {
+    return res.status(401).json({
       message: "Unauthorize",
-      data: {},
+      data: {
+        errorMessage: "Token already expired",
+        expiredAt: error.expiredAt
+       },
     });
   }
-
+  
   next();
 };
