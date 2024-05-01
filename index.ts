@@ -5,8 +5,8 @@ import cookieParser from "cookie-parser";
 import { bindFlmngr } from "@flmngr/flmngr-server-node-express";
 
 import authRoute from "./api/routes/auth";
-import userRoute from "./api/routes/user";
 import productRoute from "./api/routes/product";
+import ingredientRoute from "./api/routes/ingredient";
 
 dotenv.config();
 
@@ -23,8 +23,8 @@ app.use(
 );
 
 app.use(authRoute);
-app.use(userRoute);
 app.use(productRoute);
+app.use(ingredientRoute);
 
 bindFlmngr({
   app: app,

@@ -3,46 +3,68 @@ import { prisma } from "../../../lib/prisma";
 import bcrypt from "bcrypt";
 
 export const Register = async (req: Request, res: Response) => {
-  const { name, email, profile_picture, phone_number, role, password, jobdesk } = req.body;
+  const { name, email, profile_picture, role, password, confPassword, shift } =
+    req.body;
+
+  const existingEmail = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (existingEmail) {
+    return res.status(400).json({
+      message: "Email sudah digunakan diakun lain",
+    });
+  }
+
+  const existingName = await prisma.user.findUnique({
+    where: {
+      name,
+    },
+  });
+
+  if (existingName) {
+    return res.status(400).json({
+      message: "Nama sudah digunakan diakun lain",
+    });
+  }
+
+  const existingRole = await prisma.user_role.findFirst({
+    where: {
+      name: role
+    }
+  });
+
+  if(!existingRole) {
+    return res.status(404).json({
+      message: `Role ${role} tidak ditemukan`,
+    })
+  }
+
+  const matchPassword = password === confPassword;
+  if(!matchPassword) {
+    return res.status(400).json({
+      message: "Password dan konfirmasi password tidak cocok"
+    })
+  }
+
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(password, salt)
 
   try {
-    const existingName = await prisma.user.findUnique({
-      where: {
-        name: name,
-      },
-    });
-
-    if (existingName) {
-      return res.status(400).json({
-        message: "Nama ini sudah digunakan di akun lain",
-        data: {},
-      });
-    }
-
-    const existingEmail = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
-
-    if (existingEmail) {
-      return res.status(400).json({
-        message: "Email ini sudah digunakan di akun lain",
-        data: {},
-      });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(password, salt);
     const result = await prisma.user.create({
       data: {
         name,
         email,
         profile_picture,
-        phone_number,
-        jobdesk,
-        role,
-        password: hashPassword,
+        role: {
+          connect: {
+            id: existingRole.id
+          }
+        },
+        password: hashedPassword,
+        shift
       },
     });
 
