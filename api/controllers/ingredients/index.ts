@@ -2,24 +2,46 @@ import { Request, Response } from "express";
 import { prisma } from "../../../lib/prisma";
 
 export const getAllIngredients = async (req: Request, res: Response) => {
+  const { skip, take, search } = req.query;
+
+  let filter: any = {};
+
   try {
+    if (search && search !== "") {
+      filter = {
+        ...filter,
+        OR: [{ name: { contains: search } }],
+      };
+    }
+
     const result = await prisma.ingredient.findMany({
+      take: Number(take),
+      skip: Number(skip),
+      where: filter,
       include: {
-        categories: true,
+        category: true,
       },
+    });
+
+    const total = await prisma.ingredient.count({
+      where: filter,
     });
 
     return res.status(200).json({
       message: "Berhasil fetch data bahan baku",
-      data: result,
+      data: {
+        result: result,
+        metadata: {
+          hasNextPage: Number(skip) + Number(take) < total,
+          totalPages: Math.ceil(total / Number(take)),
+          totalData: total,
+        },
+      },
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -44,11 +66,8 @@ export const getIngredientById = async (req: Request, res: Response) => {
       });
     } catch (error: any) {
       return res.status(500).json({
-        message: "Terjadi kesalahan server",
-        data: {
-          errorMessage: error.message,
-          error: error,
-        },
+        message: "Internal server error",
+        errorMessage: error.message
       });
     }
   };
@@ -57,7 +76,7 @@ export const createIngredient = async (req: Request, res: Response) => {
   const { name, category } = req.body;
 
   try {
-    const existingCategory = await prisma.category_product.findFirst({
+    const existingCategory = await prisma.ingredient_category.findFirst({
       where: {
         name: category,
       },
@@ -72,7 +91,7 @@ export const createIngredient = async (req: Request, res: Response) => {
     await prisma.ingredient.create({
       data: {
         name,
-        categories: {
+        category: {
           connect: {
             id: existingCategory.id,
           },
@@ -84,11 +103,8 @@ export const createIngredient = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -109,7 +125,7 @@ export const editIngredient = async (req: Request, res: Response) => {
       });
     }
 
-    const existingCategory = await prisma.category_product.findFirst({
+    const existingCategory = await prisma.ingredient_category.findFirst({
       where: {
         name: category,
       },
@@ -127,7 +143,7 @@ export const editIngredient = async (req: Request, res: Response) => {
       },
       data: {
         name,
-        categories: {
+        category: {
           connect: {
             id: existingCategory.id,
           },
@@ -140,11 +156,8 @@ export const editIngredient = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -175,11 +188,8 @@ export const deleteIngredient = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };

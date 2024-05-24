@@ -10,11 +10,34 @@ export const getCategoryProduct = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
+    });
+  }
+};
+
+export const getCategoryProductById = async (req: Request, res: Response) => {
+
+  try {
+    const result = await prisma.category_product.findUnique({
+      where: {
+        id: req.body.id
+      }
+    });
+
+    if(!result) {
+      return res.status(404).json({
+        message: "Kategori tidak ditemukan"
+      })
+    }
+    return res.status(200).json({
+      message: "Berhasil fetch data kategori",
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -33,11 +56,8 @@ export const createCategoryProduct = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -70,11 +90,8 @@ export const updateCategoryProduct = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -105,11 +122,8 @@ export const deleteCategoryProduct = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 }

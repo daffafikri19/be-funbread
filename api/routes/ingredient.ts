@@ -12,20 +12,21 @@ import {
   updateCategoryIngredient,
   deleteCategoryIngredient,
 } from "../controllers/category-ingredient";
+import { verifyToken } from "../../middlewares/verify-token";
 const route = express.Router();
 
 // ingredients
 route.get("/api/ingredients/all", getAllIngredients);
-route.post("/api/ingredients/get/:id", getIngredientById);
-route.post("/api/ingredients/get/:id", getIngredientById);
-route.post("/api/ingredients/create", createIngredient);
-route.patch("/api/ingredients/update/:id", editIngredient);
-route.post("/api/ingredients/delete/:id", deleteIngredient);
+route.post("/api/ingredient/get/:id", getIngredientById);
+route.post("/api/ingredient/get/:id", getIngredientById);
+route.post("/api/ingredient/create", createIngredient);
+route.patch("/api/ingredient/update/:id", editIngredient);
+route.post("/api/ingredient/delete/:id", deleteIngredient);
 
 // category
 route.get("/api/ingredients/category/all", getCategoryIngredients);
-route.post("/api/ingredients/category/create", createCategoryIngredient);
-route.patch("/api/ingredients/category/update/:id", updateCategoryIngredient);
-route.post("/api/ingredients/category/delete/:id", deleteCategoryIngredient);
+route.post("/api/ingredient/category/create", createCategoryIngredient);
+route.patch("/api/ingredient/category/update/:id", updateCategoryIngredient);
+route.post("/api/ingredient/category/delete/:id", deleteCategoryIngredient);
 
 export default route;

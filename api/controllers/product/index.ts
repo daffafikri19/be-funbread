@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../../../lib/prisma";
 
-export const getProduct = async (req: Request, res: Response) => {
+export const getProductForDisplay = async (req: Request, res: Response) => {
   const { skip, take, search, startDate, endDate } = req.query;
 
   let filter: any = {};
@@ -15,14 +15,12 @@ export const getProduct = async (req: Request, res: Response) => {
     }
 
     if (startDate && endDate) {
-      const startMoment = `${startDate.toString()}T00:00:00.000Z`;
-      const endMoment = `${endDate.toString()}T23:59:59.999Z`;
+      const startDay = `${startDate.toString()}T00:00:00.000Z`;
+      const endDay = `${endDate.toString()}T23:59:59.999Z`;
 
       filter = {
         ...filter,
-        AND: [
-          { created_at: { gte: startMoment, lte: endMoment } }
-        ],
+        AND: [{ created_at: { gte: startDay, lte: endDay } }],
       };
     }
 
@@ -56,10 +54,55 @@ export const getProduct = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Internal server error",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      errorMessage: error.message,
+    });
+  }
+};
+
+export const getProductForReport = async (req: Request, res: Response) => {
+  try {
+    const allProducts = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        category: true,
+      }
+    });
+
+    const noCategoryProducts = allProducts
+      .filter(
+        (product) =>
+          !product.category.name.includes("Roti Kecil") &&
+          !product.category.name.includes("Roti Sedang") &&
+          !product.category.name.includes("Roti Besar")
+      )
+      .sort((a, b) => a.category.name.localeCompare(b.category.name));
+    const smallBreadProducts = allProducts
+      .filter((product) => product.category.name.includes("Roti Kecil"))
+      .sort((a, b) => a.category.name.localeCompare(b.category.name));
+    const mediumBreadProducts = allProducts
+      .filter((product) => product.category.name.includes("Roti Sedang"))
+      .sort((a, b) => a.category.name.localeCompare(b.category.name));
+    const largeBreadProducts = allProducts
+      .filter((product) => product.category.name.includes("Roti Besar"))
+      .sort((a, b) => a.category.name.localeCompare(b.category.name));
+
+    const sortedProducts = [
+      ...noCategoryProducts,
+      ...smallBreadProducts,
+      ...mediumBreadProducts,
+      ...largeBreadProducts,
+    ];
+
+    return res.status(200).json({
+      message: "Berhasil fetch data produk",
+      data: sortedProducts,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
     });
   }
 };
@@ -81,11 +124,8 @@ export const getProductById = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message,
     });
   }
 };
@@ -126,11 +166,8 @@ export const createNewProduct = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server saat membuat produk",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message,
     });
   }
 };
@@ -185,11 +222,8 @@ export const updateProduct = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server saat membuat produk",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message,
     });
   }
 };
@@ -220,11 +254,8 @@ export const deleteProduct = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message,
     });
   }
 };

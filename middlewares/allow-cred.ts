@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
-export const setCorsHeaders = (req: Request, res: Response, next: NextFunction) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+export const allowCorsHeaders = (req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Access-Control-Allow-Origin", process.env.APPLICATION_URL!);
   res.setHeader("Access-Control-Allow-Credentials", "true");
   next();
 };

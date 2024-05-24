@@ -12,7 +12,7 @@ generator client {
 datasource db {
   provider     = "mysql"
   url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  relationMode = "foreignKeys"
 }
 
 model user {
@@ -20,53 +20,100 @@ model user {
   name                 String                 @unique @db.VarChar(100)
   email                String                 @unique @db.VarChar(50)
   profile_picture      String?                @db.Text
-  role_id              Int                    @unique
+  role_id              Int
   role                 user_role              @relation(fields: [role_id], references: [id])
   password             String                 @db.LongText
-  shift                String                 @db.VarChar(10)
+  shift                String?                @db.VarChar(10)
   created_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
   report_ingredient    report_ingredient[]
   report_finance       report_finance[]
   report_stock_shift_1 report_stock_shift_1[]
   report_stock_shift_2 report_stock_shift_2[]
+
+  @@index([role_id])
 }
 
 model user_role {
   id   Int    @id @default(autoincrement())
-  name String @db.VarChar(30)
   user user[]
+  name String @db.VarChar(30)
+}
+
+model product {
+  id          String           @id @default(cuid())
+  name        String           @db.VarChar(50)
+  picture     String?          @db.LongText
+  price       Int
+  category_id Int
+  category    category_product @relation(fields: [category_id], references: [id])
+  max_age     Int?
+  created_at  DateTime         @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
+  updated_at  DateTime         @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
+
+  @@index([category_id])
+}
+
+model category_product {
+  id       Int       @id @default(autoincrement())
+  products product[]
+  name     String    @db.VarChar(50)
 }
 
 model report_ingredient {
-  id               String                   @id @default(cuid())
-  user_id          String?                  @unique
-  reporter         user?                    @relation(fields: [user_id], references: [id])
-  detail_report_id Int                      @unique
-  detail           detail_report_ingredient @relation(fields: [detail_report_id], references: [id])
-  report_date      DateTime                 @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
+  id          String                     @id @default(cuid())
+  report_date DateTime                   @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
+  detail      detail_report_ingredient[] // masing masing report pasti ada 2 dalam 1 hari
+  user_id     String?                    @unique
+  reporter    user?                      @relation(fields: [user_id], references: [id])
 }
 
 model detail_report_ingredient {
-  id            Int                 @id @default(autoincrement())
-  ingredient_id Int                 @unique
-  ingredient    ingredient          @relation(fields: [ingredient_id], references: [id])
+  id            Int               @id @default(autoincrement())
+  ingredient_id Int
+  ingredient    ingredient        @relation(fields: [ingredient_id], references: [id])
   quantity      Int
-  report        report_ingredient[]
+  report_id     String
+  report        report_ingredient @relation(fields: [report_id], references: [id])
+
+  @@index([report_id, ingredient_id])
 }
 
 model ingredient {
-  id            Int                       @id @default(autoincrement())
-  name          String                    @db.VarChar(50)
-  categories    ingredient_category[]
-  detail_report detail_report_ingredient?
+  id            Int                        @id @default(autoincrement())
+  name          String                     @db.VarChar(50)
+  category_id   Int
+  price         Int?
+  category      ingredient_category        @relation(fields: [category_id], references: [id])
+  detail_report detail_report_ingredient[]
+  recipe        recipes_ingredient[]
+
+  @@index([category_id])
 }
 
 model ingredient_category {
-  id            Int         @id @default(autoincrement())
-  name          String      @db.VarChar(30)
-  ingredient_id Int?        @unique
-  ingredient    ingredient? @relation(fields: [ingredient_id], references: [id])
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(30)
+  ingredient_id Int?
+  ingredients   ingredient[]
+}
+
+model recipes_ingredient {
+  id            Int        @id @default(autoincrement())
+  dose          Int
+  recipe_id     Int
+  recipe        recipe     @relation(fields: [recipe_id], references: [id])
+  ingredient_id Int
+  ingredients   ingredient @relation(fields: [ingredient_id], references: [id])
+
+  @@index([recipe_id, ingredient_id])
+}
+
+model recipe {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(50)
+  total_price        Int
+  recipes_ingredient recipes_ingredient[]
 }
 
 model report_finance {
@@ -76,7 +123,7 @@ model report_finance {
   income      Int
   cash        Int
   non_cash    non_cash[]
-  outcome     outcome[]
+  expences    expence[]
   report_date DateTime   @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
 }
 
@@ -89,7 +136,7 @@ model non_cash {
   amount         Int
 }
 
-model outcome {
+model expence {
   id             Int            @id @default(autoincrement())
   amount         Int
   report_id      String         @unique
@@ -98,59 +145,33 @@ model outcome {
 }
 
 model report_stock {
-  id          String                @id @default(cuid())
-  report_date DateTime              @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
-  grand_total Int
-  detail      detail_report_stock[]
-}
-
-model detail_report_stock {
-  id              Int          @id @default(autoincrement())
-  product_id      String       @unique
-  product         product      @relation(fields: [product_id], references: [id])
-  report_id       String       @unique
-  report_stock_id report_stock @relation(fields: [report_id], references: [id])
+  id             String                @id @default(cuid())
+  report_date    DateTime              @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
+  grand_total    Int
+  report_shift_1 report_stock_shift_1?
+  report_shift_2 report_stock_shift_2?
 }
 
 model report_stock_shift_1 {
-  id              Int     @id @unique @default(autoincrement())
-  user_id         String? @unique
-  reporter        user?   @relation(fields: [user_id], references: [id])
-  stock_before    Int?
-  afternoon_stock Int?
-  order           Int
-  withdrawal      Int
-  total_price     Int
+  id        Int          @id @unique @default(autoincrement())
+  report_id String       @unique
+  user_id   String       @unique
+  reporter  user         @relation(fields: [user_id], references: [id])
+  values    Json
+  report    report_stock @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([report_id])
 }
 
 model report_stock_shift_2 {
-  id              Int     @id @unique @default(autoincrement())
-  user_id         String? @unique
-  reporter        user?   @relation(fields: [user_id], references: [id])
-  morning_stock   Int?
-  afternoon_stock Int?
-  total_price     Int
-}
+  id        Int          @id @unique @default(autoincrement())
+  report_id String       @unique
+  user_id   String       @unique
+  reporter  user         @relation(fields: [user_id], references: [id])
+  values    Json
+  report    report_stock @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-model product {
-  id                  String                @id @default(cuid())
-  name                String                @db.VarChar(50)
-  picture             String?                @db.LongText
-  price               Int
-  category_id         Int                   
-  category            category_product      @relation(fields: [category_id], references: [id])
-  max_age             Int?
-  created_at          DateTime              @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
-  updated_at          DateTime              @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
-  detail_report_stock detail_report_stock[]
-
-  @@index([category_id])
-}
-
-model category_product {
-  id      Int       @id @default(autoincrement())
-  product product[]
-  name    String    @db.VarChar(50)
+  @@index([report_id])
 }
 
 model order_request {

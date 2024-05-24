@@ -10,11 +10,8 @@ export const getCategoryIngredients = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -33,11 +30,8 @@ export const createCategoryIngredient = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -70,11 +64,8 @@ export const updateCategoryIngredient = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 };
@@ -105,11 +96,8 @@ export const deleteCategoryIngredient = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({
-      message: "Terjadi kesalahan server",
-      data: {
-        errorMessage: error.message,
-        error: error,
-      },
+      message: "Internal server error",
+      errorMessage: error.message
     });
   }
 }
