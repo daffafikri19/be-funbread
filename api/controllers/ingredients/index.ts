@@ -52,6 +52,9 @@ export const getIngredientById = async (req: Request, res: Response) => {
       const result = await prisma.ingredient.findUnique({
         where: {
             id
+        },
+        include: {
+          category: true,
         }
       });
       if(!result) {
@@ -73,7 +76,7 @@ export const getIngredientById = async (req: Request, res: Response) => {
   };
 
 export const createIngredient = async (req: Request, res: Response) => {
-  const { name, category } = req.body;
+  const { name, category, price } = req.body;
 
   try {
     const existingCategory = await prisma.ingredient_category.findFirst({
@@ -96,6 +99,7 @@ export const createIngredient = async (req: Request, res: Response) => {
             id: existingCategory.id,
           },
         },
+        price,
       },
     });
     return res.status(201).json({
@@ -110,7 +114,7 @@ export const createIngredient = async (req: Request, res: Response) => {
 };
 
 export const editIngredient = async (req: Request, res: Response) => {
-  const { id, name, category } = req.body;
+  const { id, name, category, price } = req.body;
 
   try {
     const existingIngredient = await prisma.ingredient.findUnique({
@@ -148,6 +152,7 @@ export const editIngredient = async (req: Request, res: Response) => {
             id: existingCategory.id,
           },
         },
+        price
       },
     });
 

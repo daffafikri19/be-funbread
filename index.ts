@@ -9,9 +9,9 @@ import userRoute from "./api/routes/user";
 import productRoute from "./api/routes/product";
 import ingredientRoute from "./api/routes/ingredient";
 import reportRoute from "./api/routes/report";
-
 dotenv.config();
 
+process.env.TZ = 'Asia/Jakarta';
 const app = express();
 
 app.use(cookieParser())

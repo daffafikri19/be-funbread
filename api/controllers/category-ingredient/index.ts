@@ -16,6 +16,32 @@ export const getCategoryIngredients = async (req: Request, res: Response) => {
   }
 };
 
+export const getCategoryIngredientById = async (req: Request, res: Response) => {
+
+  try {
+    const result = await prisma.ingredient_category.findUnique({
+      where: {
+        id: req.body.id
+      }
+    });
+
+    if(!result) {
+      return res.status(404).json({
+        message: "Kategori tidak ditemukan"
+      })
+    }
+    return res.status(200).json({
+      message: "Berhasil fetch data kategori",
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message
+    });
+  }
+};
+
 export const createCategoryIngredient = async (req: Request, res: Response) => {
   const { name } = req.body;
 
