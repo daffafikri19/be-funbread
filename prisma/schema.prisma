@@ -27,7 +27,7 @@ model user {
   created_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
   report_ingredient    report_ingredient[]
-  report_finance       report_finance[]
+  report_sales         report_sales[]
   report_stock_shift_1 report_stock_shift_1[]
   report_stock_shift_2 report_stock_shift_2[]
 
@@ -64,8 +64,9 @@ model report_ingredient {
   id          String                     @id @default(cuid())
   report_date DateTime                   @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   detail      detail_report_ingredient[] // masing masing report pasti ada 2 dalam 1 hari
-  user_id     String?                    @unique
+  user_id     String?                    
   reporter    user?                      @relation(fields: [user_id], references: [id])
+  @@index([user_id])
 }
 
 model detail_report_ingredient {
@@ -92,9 +93,9 @@ model ingredient {
 }
 
 model ingredient_category {
-  id            Int          @id @default(autoincrement())
-  name          String       @db.VarChar(30)
-  ingredients   ingredient[]
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(30)
+  ingredients ingredient[]
 }
 
 model recipes_ingredient {
@@ -115,32 +116,42 @@ model recipe {
   recipes_ingredient recipes_ingredient[]
 }
 
-model report_finance {
-  id          String     @id @default(cuid())
-  user_id     String?    @unique
-  reporter    user?      @relation(fields: [user_id], references: [id])
-  income      Int
-  cash        Int
-  non_cash    non_cash[]
-  expences    expence[]
-  report_date DateTime   @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
+model report_sales {
+  id             String @id @default(cuid())
+  user_id        String
+  reporter       user   @relation(fields: [user_id], references: [id])
+  total_income   Int
+  total_cash     Int
+  total_non_cash Int
+  total_expences Int
+
+  non_cash      non_cash[]
+  expences      expences[]
+  
+  report_date   DateTime    @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
+
+  @@index([user_id])
 }
 
 model non_cash {
-  id             Int            @id @default(autoincrement())
-  report_id      String         @unique
-  report_finance report_finance @relation(fields: [report_id], references: [id])
-  reciept        String         @db.LongText
-  description    String         @db.LongText
-  amount         Int
+  id           Int          @id @default(autoincrement())
+  report_id    String?
+  report_sales report_sales? @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reciept      String?      @db.LongText
+  description  String?      @db.VarChar(30)
+  amount       Int?
+
+  @@index([report_id])
 }
 
-model expence {
-  id             Int            @id @default(autoincrement())
-  amount         Int
-  report_id      String         @unique
-  report_finance report_finance @relation(fields: [report_id], references: [id])
-  description    String         @db.LongText
+model expences {
+  id           Int          @id @default(autoincrement())
+  report_id    String?
+  report_sales report_sales? @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  amount       Int?
+  description  String?      @db.VarChar(30)
+
+  @@index([report_id])
 }
 
 model report_stock {
@@ -152,25 +163,25 @@ model report_stock {
 }
 
 model report_stock_shift_1 {
-  id        Int          @id @unique @default(autoincrement())
+  id        Int          @id @default(autoincrement())
   report_id String       @unique
-  user_id   String       @unique
+  user_id   String       
   reporter  user         @relation(fields: [user_id], references: [id])
   values    Json
-  report    report_stock @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  report    report_stock @relation(fields: [report_id], references: [id])
 
-  @@index([report_id])
+  @@index([report_id, user_id])
 }
 
 model report_stock_shift_2 {
-  id        Int          @id @unique @default(autoincrement())
+  id        Int          @id @default(autoincrement())
   report_id String       @unique
-  user_id   String       @unique
+  user_id   String       
   reporter  user         @relation(fields: [user_id], references: [id])
   values    Json
   report    report_stock @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@index([report_id])
+  @@index([report_id, user_id])
 }
 
 model order_request {

@@ -94,6 +94,7 @@ export const fetchReportShiftYesterday = async (
   
     const endDay = new Date(yesterday);
     endDay.setUTCHours(23, 59, 59, 999);
+
   try {
     
     const result = await prisma.report_stock.findFirst({
