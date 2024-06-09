@@ -8,14 +8,6 @@ export const fetchAllReportSales = async (req: Request, res: Response) => {
         report_date: "desc",
       },
       include: {
-        reporter: {
-          select: {
-            id: true,
-            name: true,
-            role: true,
-            shift: true,
-          },
-        },
         non_cash: {
           select: {
             description: true,
@@ -51,12 +43,7 @@ export const getSalesReportById = async (req: Request, res: Response) => {
       },
       include: {
         expences: true,
-        non_cash: true,
-        reporter: {
-          select: {
-            name: true
-          }
-        }
+        non_cash: true
       }
     })
 
@@ -105,11 +92,7 @@ export const CreateReportSales = async (req: Request, res: Response) => {
     await prisma.$transaction(async (prisma) => {
       const report = await prisma.report_sales.create({
         data: {
-          reporter: {
-            connect: {
-              name: existingUser.name,
-            },
-          },
+          reporter: existingUser.id,
           total_income,
           total_cash,
           total_non_cash,

@@ -34,23 +34,13 @@ export const fetchAllReport = async (req: Request, res: Response) => {
       where: filter,
       include: {
         report_shift_1: {
-          include: {
-            reporter: {
-              select: {
-                name: true,
-                shift: true,
-              }
-            }
+          select: {
+            reporter: true
           }
         },
         report_shift_2: {
-          include: {
-            reporter: {
-              select: {
-                name: true,
-                shift: true,
-              }
-            }
+          select: {
+            reporter: true
           }
         },
       }
@@ -182,11 +172,7 @@ export const createReportStockShift1 = async (req: Request, res: Response) => {
         report_date: date,
         report_shift_1: {
             create: {
-                reporter: {
-                    connect: {
-                        id: existingUser.id
-                    }
-                },
+                reporter: reporter.id,
                 values: values
             }
         },
@@ -241,11 +227,7 @@ export const createReportStockShift2 = async (req: Request, res: Response) => {
         report_shift_2: {
           create: {
             values,
-            reporter: {
-              connect: {
-                id: existingUser.id
-              }
-            }
+            reporter: existingUser.id
           }
         }
       }
