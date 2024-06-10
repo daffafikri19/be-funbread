@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../../../../lib/prisma";
 
-
 export const fetchAllReport = async (req: Request, res: Response) => {
   const { skip, take, search, startDate, endDate } = req.query;
 
@@ -35,15 +34,15 @@ export const fetchAllReport = async (req: Request, res: Response) => {
       include: {
         report_shift_1: {
           select: {
-            reporter: true
-          }
+            reporter: true,
+          },
         },
         report_shift_2: {
           select: {
-            reporter: true
-          }
+            reporter: true,
+          },
         },
-      }
+      },
     });
 
     const total = await prisma.report_stock.count({
@@ -67,38 +66,37 @@ export const fetchAllReport = async (req: Request, res: Response) => {
       errorMessage: error.message,
     });
   }
-}
+};
 
 export const fetchReportShiftYesterday = async (
   req: Request,
   res: Response
 ) => {
+  const { date } = req.body;
 
-    const { date } = req.body;
+  const yesterday = new Date(date);
+  yesterday.setDate(yesterday.getDate() - 1);
 
-    const yesterday = new Date(date);
-    yesterday.setDate(yesterday.getDate() - 1);
-  
-    const startDay = new Date(yesterday);
-    startDay.setUTCHours(0, 0, 0, 0);
-  
-    const endDay = new Date(yesterday);
-    endDay.setUTCHours(23, 59, 59, 999);
+  const startDay = new Date(yesterday);
+  startDay.setUTCHours(0, 0, 0, 0);
+
+  const endDay = new Date(yesterday);
+  endDay.setUTCHours(23, 59, 59, 999);
 
   try {
-    
     const result = await prisma.report_stock.findFirst({
       where: {
         report_date: {
-            gte: startDay.toISOString(), lte: endDay.toISOString()
+          gte: startDay.toISOString(),
+          lte: endDay.toISOString(),
         },
       },
       select: {
         id: true,
         report_date: true,
         report_shift_1: true,
-        report_shift_2: true
-      }
+        report_shift_2: true,
+      },
     });
 
     return res.status(200).json({
@@ -113,30 +111,27 @@ export const fetchReportShiftYesterday = async (
   }
 };
 
-export const fetchReportShiftToday = async (
-  req: Request,
-  res: Response
-) => {
-    const today = new Date(Date.now());
-  
-    const startDay = new Date(today);
-    startDay.setUTCHours(0, 0, 0, 0);
-  
-    const endDay = new Date(today);
-    endDay.setUTCHours(23, 59, 59, 999);
+export const fetchReportShiftToday = async (req: Request, res: Response) => {
+  const today = new Date(Date.now());
+
+  const startDay = new Date(today);
+  startDay.setUTCHours(0, 0, 0, 0);
+
+  const endDay = new Date(today);
+  endDay.setUTCHours(23, 59, 59, 999);
   try {
-    
     const result = await prisma.report_stock.findFirst({
       where: {
         report_date: {
-            gte: startDay.toISOString(), lte: endDay.toISOString()
+          gte: startDay.toISOString(),
+          lte: endDay.toISOString(),
         },
       },
       select: {
         id: true,
         report_date: true,
         report_shift_1: true,
-      }
+      },
     });
 
     return res.status(200).json({
@@ -153,7 +148,7 @@ export const fetchReportShiftToday = async (
 
 export const createReportStockShift1 = async (req: Request, res: Response) => {
   const { reporter, values, grand_total, date } = req.body;
-  
+
   const existingUser = await prisma.user.findUnique({
     where: {
       name: reporter,
@@ -171,10 +166,10 @@ export const createReportStockShift1 = async (req: Request, res: Response) => {
         grand_total: grand_total,
         report_date: date,
         report_shift_1: {
-            create: {
-                reporter: reporter.id,
-                values: values
-            }
+          create: {
+            reporter: reporter.id,
+            values: values,
+          },
         },
       },
     });
@@ -183,7 +178,7 @@ export const createReportStockShift1 = async (req: Request, res: Response) => {
       message: "Laporan shift 1 berhasil dibuat",
     });
   } catch (error: any) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       message: "Internal server error",
       errorMessage: error.message,
@@ -191,11 +186,9 @@ export const createReportStockShift1 = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const createReportStockShift2 = async (req: Request, res: Response) => {
   const { report_id, reporter, values } = req.body;
-  
+
   const existingUser = await prisma.user.findUnique({
     where: {
       name: reporter,
@@ -210,36 +203,135 @@ export const createReportStockShift2 = async (req: Request, res: Response) => {
 
   const existingReport = await prisma.report_stock.findUnique({
     where: {
-      id: report_id
-    }
+      id: report_id,
+    },
   });
-  if(!existingReport) {
+  if (!existingReport) {
     return res.status(404).json({
-      message: "tidak dapat membuat laporan stok shift 2 sebelum shift 1"
-    })
+      message: "tidak dapat membuat laporan stok shift 2 sebelum shift 1",
+    });
   }
   try {
     await prisma.report_stock.update({
       where: {
-        id: report_id
+        id: report_id,
       },
       data: {
         report_shift_2: {
           create: {
             values,
-            reporter: existingUser.id
-          }
-        }
-      }
+            reporter: existingUser.id,
+          },
+        },
+      },
     });
 
     return res.status(201).json({
-      message: "Laporan stok shift 2 berhasil dibuat"
-    })
-  }  catch (error: any) {
+      message: "Laporan stok shift 2 berhasil dibuat",
+    });
+  } catch (error: any) {
     return res.status(500).json({
       message: "Internal server error",
       errorMessage: error.message,
     });
   }
-}
+};
+
+export const editReportStockShift1 = async (req: Request, res: Response) => {
+  const { report_id, values } = req.body;
+  try {
+    const report = await prisma.report_stock_shift_1.findUnique({
+      where: {
+        id: report_id,
+      },
+    });
+    if (!report) {
+      return res.status(404).json({
+        message: "Id laporan stok tidak ditemukan",
+      });
+    }
+    await prisma.report_stock_shift_1.update({
+      where: {
+        id: report.id,
+      },
+      data: {
+        values,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Berhasil edit data laporan ini"
+    })
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
+    });
+  }
+};
+
+export const editReportStockShift2 = async (req: Request, res: Response) => {
+  const { report_id, values } = req.body;
+  try {
+    const report = await prisma.report_stock_shift_2.findUnique({
+      where: {
+        id: report_id,
+      },
+    });
+    if (!report) {
+      return res.status(404).json({
+        message: "ID laporan stok tidak ditemukan",
+      });
+    }
+    await prisma.report_stock_shift_2.update({
+      where: {
+        id: report.id,
+      },
+      data: {
+        values,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Berhasil edit data laporan ini"
+    })
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
+    });
+  }
+};
+
+export const deleteReportStock = async (req: Request, res: Response) => {
+  const { report_id } = req.body;
+
+  try {
+    const existingReport = await prisma.report_stock.findUnique({
+      where: {
+        id: report_id,
+      },
+    });
+
+    if (!existingReport) {
+      return res.status(404).json({
+        message: "Id laporan tidak ditemukan",
+      });
+    }
+
+    await prisma.report_stock.delete({
+      where: {
+        id: existingReport.id,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Berhasil menghapus data laporan ini",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
+    });
+  }
+};

@@ -42,7 +42,7 @@ model product {
   picture     String?          @db.LongText
   price       Int
   category_id Int
-  category    category_product @relation(fields: [category_id], references: [id])
+  category    category_product @relation(fields: [category_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   max_age     Int?
   created_at  DateTime         @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at  DateTime         @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
@@ -158,7 +158,7 @@ model report_stock_shift_1 {
   report_id String       @unique
   reporter  String       
   values    Json
-  report    report_stock @relation(fields: [report_id], references: [id])
+  report    report_stock @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([report_id])
 }
