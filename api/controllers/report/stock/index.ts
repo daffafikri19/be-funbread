@@ -35,11 +35,13 @@ export const fetchAllReport = async (req: Request, res: Response) => {
         report_shift_1: {
           select: {
             reporter: true,
+            values: true,
           },
         },
         report_shift_2: {
           select: {
             reporter: true,
+            values: true
           },
         },
       },
@@ -156,7 +158,7 @@ export const createReportStockShift1 = async (req: Request, res: Response) => {
   });
 
   if (!existingUser) {
-    return res.status(400).json({
+    return res.status(404).json({
       message: "Akun pengguna tidak ditemukan",
     });
   }
@@ -167,7 +169,7 @@ export const createReportStockShift1 = async (req: Request, res: Response) => {
         report_date: date,
         report_shift_1: {
           create: {
-            reporter: reporter.id,
+            reporter: existingUser.id,
             values: values,
           },
         },
@@ -187,7 +189,7 @@ export const createReportStockShift1 = async (req: Request, res: Response) => {
 };
 
 export const createReportStockShift2 = async (req: Request, res: Response) => {
-  const { report_id, reporter, values } = req.body;
+  const { report_id, reporter, values, grand_total } = req.body;
 
   const existingUser = await prisma.user.findUnique({
     where: {
@@ -223,6 +225,9 @@ export const createReportStockShift2 = async (req: Request, res: Response) => {
             reporter: existingUser.id,
           },
         },
+        grand_total: {
+          increment: grand_total
+        }
       },
     });
 
