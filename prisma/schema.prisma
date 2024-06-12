@@ -10,7 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
+  provider     = "postgresql"
   url          = env("DATABASE_URL")
   relationMode = "foreignKeys"
 }
@@ -22,7 +22,7 @@ model user {
   profile_picture      String?                @db.Text
   role_id              Int
   role                 user_role              @relation(fields: [role_id], references: [id])
-  password             String                 @db.LongText
+  password             String                 @db.Text
   shift                String?                @db.VarChar(10)
   created_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
@@ -39,7 +39,7 @@ model user_role {
 model product {
   id          String           @id @default(cuid())
   name        String           @db.VarChar(50)
-  picture     String?          @db.LongText
+  picture     String?          @db.Text
   price       Int
   category_id Int
   category    category_product @relation(fields: [category_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
@@ -128,7 +128,7 @@ model non_cash {
   id           Int          @id @default(autoincrement())
   report_id    String?
   report_sales report_sales? @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  reciept      String?      @db.LongText
+  reciept      String?      @db.Text
   description  String?      @db.VarChar(30)
   amount       Int?
 
