@@ -10,9 +10,10 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
+  provider     = "postgresql"
   url          = env("DATABASE_URL")
   relationMode = "foreignKeys"
+  directUrl = env("DIRECT_URL")
 }
 
 model user {
@@ -22,14 +23,10 @@ model user {
   profile_picture      String?                @db.Text
   role_id              Int
   role                 user_role              @relation(fields: [role_id], references: [id])
-  password             String                 @db.LongText
+  password             String                 @db.Text
   shift                String?                @db.VarChar(10)
   created_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at           DateTime               @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
-  report_ingredient    report_ingredient[]
-  report_sales         report_sales[]
-  report_stock_shift_1 report_stock_shift_1[]
-  report_stock_shift_2 report_stock_shift_2[]
 
   @@index([role_id])
 }
@@ -43,10 +40,10 @@ model user_role {
 model product {
   id          String           @id @default(cuid())
   name        String           @db.VarChar(50)
-  picture     String?          @db.LongText
+  picture     String?          @db.Text
   price       Int
   category_id Int
-  category    category_product @relation(fields: [category_id], references: [id])
+  category    category_product @relation(fields: [category_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   max_age     Int?
   created_at  DateTime         @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
   updated_at  DateTime         @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @db.Timestamp()
@@ -63,10 +60,8 @@ model category_product {
 model report_ingredient {
   id          String                     @id @default(cuid())
   report_date DateTime                   @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
-  detail      detail_report_ingredient[] // masing masing report pasti ada 2 dalam 1 hari
-  user_id     String?                    
-  reporter    user?                      @relation(fields: [user_id], references: [id])
-  @@index([user_id])
+  detail      detail_report_ingredient[]
+  reporter     String
 }
 
 model detail_report_ingredient {
@@ -118,8 +113,7 @@ model recipe {
 
 model report_sales {
   id             String @id @default(cuid())
-  user_id        String
-  reporter       user   @relation(fields: [user_id], references: [id])
+  reporter        String
   total_income   Int
   total_cash     Int
   total_non_cash Int
@@ -129,15 +123,13 @@ model report_sales {
   expences      expences[]
   
   report_date   DateTime    @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
-
-  @@index([user_id])
 }
 
 model non_cash {
   id           Int          @id @default(autoincrement())
   report_id    String?
   report_sales report_sales? @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  reciept      String?      @db.LongText
+  reciept      String?      @db.Text
   description  String?      @db.VarChar(30)
   amount       Int?
 
@@ -165,23 +157,21 @@ model report_stock {
 model report_stock_shift_1 {
   id        Int          @id @default(autoincrement())
   report_id String       @unique
-  user_id   String       
-  reporter  user         @relation(fields: [user_id], references: [id])
+  reporter  String       
   values    Json
-  report    report_stock @relation(fields: [report_id], references: [id])
+  report    report_stock @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@index([report_id, user_id])
+  @@index([report_id])
 }
 
 model report_stock_shift_2 {
   id        Int          @id @default(autoincrement())
   report_id String       @unique
-  user_id   String       
-  reporter  user         @relation(fields: [user_id], references: [id])
+  reporter   String       
   values    Json
   report    report_stock @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@index([report_id, user_id])
+  @@index([report_id])
 }
 
 model order_request {

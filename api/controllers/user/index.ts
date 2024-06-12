@@ -58,7 +58,7 @@ export const findUserByID = async (req: Request, res: Response) => {
 
     if (!existingUser) {
       return res.status(404).json({
-        message: "Id akun tidak ditemukan / invalid",
+        message: "Id akun tidak ditemukan",
       });
     }
 
@@ -66,7 +66,12 @@ export const findUserByID = async (req: Request, res: Response) => {
       where: {
         id: existingUser.id,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profile_picture: true,
+        shift: true,
         role: true
       }
     });

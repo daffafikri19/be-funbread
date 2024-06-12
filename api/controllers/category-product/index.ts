@@ -2,8 +2,21 @@ import { Request, Response } from "express";
 import { prisma } from "../../../lib/prisma";
 
 export const getCategoryProduct = async (req: Request, res: Response) => {
+  const { search } = req.query;
+
+  let filter: any = {};
+
   try {
-    const result = await prisma.category_product.findMany();
+    if(search && search !== "") {
+      filter = {
+        ...filter,
+        OR: [{ name: { contains: search } }]
+      }
+    }
+
+    const result = await prisma.category_product.findMany({
+      where: filter
+    });
     return res.status(200).json({
       message: "Berhasil fetch data kategori",
       data: result,

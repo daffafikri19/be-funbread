@@ -2,20 +2,36 @@ import { Request, Response } from "express";
 import { prisma } from "../../../../lib/prisma";
 
 export const fetchAllReportSales = async (req: Request, res: Response) => {
+  const { skip, take, search, startDate, endDate } = req.query;
+
+  let filter: any = {};
+
   try {
+    if(search && search !== "") {
+      filter = {
+        ...filter,
+        OR: [{ id: { contains: search } }]
+      }
+    }
+
+    if (startDate && endDate) {
+      const startDay = `${startDate.toString()}T00:00:00.000Z`;
+      const endDay = `${endDate.toString()}T23:59:59.999Z`;
+
+      filter = {
+        ...filter,
+        AND: [{ created_at: { gte: startDay, lte: endDay } }],
+      };
+    }
+
     const data = await prisma.report_sales.findMany({
       orderBy: {
         report_date: "desc",
       },
+      take: Number(take),
+      skip: Number(skip),
+      where: filter,
       include: {
-        reporter: {
-          select: {
-            id: true,
-            name: true,
-            role: true,
-            shift: true,
-          },
-        },
         non_cash: {
           select: {
             description: true,
@@ -31,9 +47,21 @@ export const fetchAllReportSales = async (req: Request, res: Response) => {
         }
       },
     });
+    
+    const total = await prisma.product.count({
+      where: filter
+    });
+
     return res.status(200).json({
       message: "Berhasil fetch data report keuangan",
-      data: data,
+      data: {
+        result: data,
+        metadata: {
+          hasNextPage: Number(skip) + Number(take) < total,
+          totalPages: Math.ceil(total / Number(take)),
+          totalData: total,
+        }
+      },
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -51,12 +79,7 @@ export const getSalesReportById = async (req: Request, res: Response) => {
       },
       include: {
         expences: true,
-        non_cash: true,
-        reporter: {
-          select: {
-            name: true
-          }
-        }
+        non_cash: true
       }
     })
 
@@ -105,11 +128,7 @@ export const CreateReportSales = async (req: Request, res: Response) => {
     await prisma.$transaction(async (prisma) => {
       const report = await prisma.report_sales.create({
         data: {
-          reporter: {
-            connect: {
-              name: existingUser.name,
-            },
-          },
+          reporter: existingUser.id,
           total_income,
           total_cash,
           total_non_cash,
