@@ -13,8 +13,8 @@ export const Login = async (req: Request, res: Response) => {
     });
 
     if (!existingAccount) {
-      return res.status(404).json({
-        message: "Akun dengan email ini tidak ditemukan",
+      return res.status(400).json({
+        message: "Email salah atau akun tidak ditemukan",
       });
     }
 

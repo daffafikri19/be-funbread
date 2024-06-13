@@ -151,7 +151,7 @@ export const CreateReportSales = async (req: Request, res: Response) => {
       });
     });
 
-    return res.status(200).json({
+    return res.status(201).json({
       message: "Berhasil membuat laporan",
     });
   } catch (error: any) {
