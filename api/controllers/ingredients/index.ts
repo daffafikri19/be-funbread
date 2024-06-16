@@ -76,9 +76,16 @@ export const getIngredientById = async (req: Request, res: Response) => {
   };
 
 export const createIngredient = async (req: Request, res: Response) => {
-  const { name, category, price } = req.body;
+  const { name, category, price, unit } = req.body;
 
   try {
+
+    if(!category) {
+      return res.status(400).json({
+        message: "Kategori tidak boleh kosong"
+      })
+    }
+
     const existingCategory = await prisma.ingredient_category.findFirst({
       where: {
         name: category,
@@ -100,6 +107,7 @@ export const createIngredient = async (req: Request, res: Response) => {
           },
         },
         price,
+        unit: unit
       },
     });
     return res.status(201).json({
@@ -114,7 +122,7 @@ export const createIngredient = async (req: Request, res: Response) => {
 };
 
 export const editIngredient = async (req: Request, res: Response) => {
-  const { id, name, category, price } = req.body;
+  const { id, name, category, price, unit } = req.body;
 
   try {
     const existingIngredient = await prisma.ingredient.findUnique({
@@ -152,7 +160,8 @@ export const editIngredient = async (req: Request, res: Response) => {
             id: existingCategory.id,
           },
         },
-        price
+        price,
+        unit
       },
     });
 
