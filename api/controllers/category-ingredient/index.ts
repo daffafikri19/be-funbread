@@ -45,13 +45,14 @@ export const getCategoryIngredientById = async (req: Request, res: Response) => 
 export const createCategoryIngredient = async (req: Request, res: Response) => {
   const { name } = req.body;
 
-  if(!name || name === "") {
-    return res.status(400).json({
-      message: "nama kategori tidak boleh kosong"
-    })
-  }
-  
   try {
+
+    if(!name || name === "") {
+      return res.status(400).json({
+        message: "nama kategori tidak boleh kosong"
+      })
+    }
+
     await prisma.ingredient_category.create({
       data: {
         name,

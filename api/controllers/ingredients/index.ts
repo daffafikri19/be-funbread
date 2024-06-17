@@ -46,6 +46,22 @@ export const getAllIngredients = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllIngredientsForReport = async (req: Request, res: Response) => {
+  try {
+    const result = await prisma.ingredient.findMany();
+
+    return res.status(200).json({
+      message: "Berhasil fetch data ingredients",
+      data: result
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message
+    });
+  }
+}
+
 export const getIngredientById = async (req: Request, res: Response) => {
     const { id } = req.body;
     try {
@@ -74,6 +90,27 @@ export const getIngredientById = async (req: Request, res: Response) => {
       });
     }
   };
+
+export const getIngredientForRecipe = async (req: Request, res: Response) => {
+  try {
+    const result = await prisma.ingredient.findMany({
+      select: {
+        id: true,
+        name: true
+      }
+    });
+
+    return res.status(200).json({
+      message: "berhasil fetch",
+      data: result
+    })
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message
+    });
+  }
+}
 
 export const createIngredient = async (req: Request, res: Response) => {
   const { name, category, price, unit } = req.body;

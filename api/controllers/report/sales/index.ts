@@ -20,7 +20,7 @@ export const fetchAllReportSales = async (req: Request, res: Response) => {
 
       filter = {
         ...filter,
-        AND: [{ created_at: { gte: startDay, lte: endDay } }],
+        AND: [{ report_date: { gte: startDay, lte: endDay } }],
       };
     }
 
@@ -39,7 +39,7 @@ export const fetchAllReportSales = async (req: Request, res: Response) => {
             reciept: true
           }
         },
-        expences: {
+        expenses: {
           select: {
             description: true,
             amount: true
@@ -48,7 +48,7 @@ export const fetchAllReportSales = async (req: Request, res: Response) => {
       },
     });
     
-    const total = await prisma.product.count({
+    const total = await prisma.report_sales.count({
       where: filter
     });
 
@@ -78,7 +78,7 @@ export const getSalesReportById = async (req: Request, res: Response) => {
         id: req.body.id
       },
       include: {
-        expences: true,
+        expenses: true,
         non_cash: true
       }
     })
@@ -105,34 +105,35 @@ export const CreateReportSales = async (req: Request, res: Response) => {
   const { 
     reporter, 
     non_cash, 
-    expences,
+    expenses,
     total_income,
     total_cash,
     total_non_cash,
-    total_expences
+    total_expenses
   } = req.body;
 
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      name: reporter,
-    },
-  });
-
-  if (!existingUser) {
-    return res.status(404).json({
-      message: "User tidak ditemukan",
-    });
-  }
-
   try {
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        name: reporter,
+      },
+    });
+  
+    if (!existingUser) {
+      return res.status(404).json({
+        message: "User tidak ditemukan",
+      });
+    }
+
     await prisma.$transaction(async (prisma) => {
       const report = await prisma.report_sales.create({
         data: {
-          reporter: existingUser.id,
+          reporter: existingUser.name,
           total_income,
           total_cash,
           total_non_cash,
-          total_expences,
+          total_expenses,
         },
       });
 
@@ -143,8 +144,8 @@ export const CreateReportSales = async (req: Request, res: Response) => {
         })),
       });
 
-      await prisma.expences.createMany({
-        data: expences.map((data: any) => ({
+      await prisma.expenses.createMany({
+        data: expenses.map((data: any) => ({
           ...data,
           report_id: report.id,
         })),

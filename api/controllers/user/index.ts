@@ -91,31 +91,32 @@ export const findUserByID = async (req: Request, res: Response) => {
 export const editUserAccount = async (req: Request, res: Response) => {
   const { id, name, email, profile_picture, role, shift } = req.body;
 
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      id,
-    }
-  });
-
-  if (!existingUser) {
-    return res.status(404).json({
-      message: "Akun tidak ditemukan",
-    });
-  }
-
-  const exisitingRole = await prisma.user_role.findFirst({
-    where: {
-      name: role,
-    },
-  });
-
-  if (!exisitingRole) {
-    return res.status(400).json({
-      message: "Role akun tidak valid",
-    });
-  }
-
   try {
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        id,
+      }
+    });
+  
+    if (!existingUser) {
+      return res.status(404).json({
+        message: "Akun tidak ditemukan",
+      });
+    }
+  
+    const exisitingRole = await prisma.user_role.findFirst({
+      where: {
+        name: role,
+      },
+    });
+  
+    if (!exisitingRole) {
+      return res.status(400).json({
+        message: "Role akun tidak valid",
+      });
+    }
+
     await prisma.user.update({
       where: {
         id: existingUser.id,
@@ -147,18 +148,20 @@ export const editUserAccount = async (req: Request, res: Response) => {
 export const deleteUserAccount = async (req: Request, res: Response) => {
   const { id } = req.body;
 
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      id,
-    },
-  });
-
-  if (!existingUser) {
-    return res.status(404).json({
-      message: "Id akun tidak ditemukan / invalid",
-    });
-  }
   try {
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+  
+    if (!existingUser) {
+      return res.status(404).json({
+        message: "Id akun tidak ditemukan / invalid",
+      });
+    }
+    
     await prisma.user.delete({
       where: {
         id: existingUser.id,

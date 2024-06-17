@@ -78,18 +78,20 @@ export const createCategoryProduct = async (req: Request, res: Response) => {
 export const updateCategoryProduct = async (req: Request, res: Response) => {
   const { id, name } = req.body;
 
-  const existingCategory = await prisma.category_product.findUnique({
-    where: {
-      id,
-    },
-  });
-
-  if (!existingCategory) {
-    return res.status(404).json({
-      message: "Kategori tidak ditemukan",
-    });
-  }
   try {
+
+    const existingCategory = await prisma.category_product.findUnique({
+      where: {
+        id,
+      },
+    });
+  
+    if (!existingCategory) {
+      return res.status(404).json({
+        message: "Kategori tidak ditemukan",
+      });
+    }
+    
     await prisma.category_product.update({
       where: {
         id: existingCategory.id,

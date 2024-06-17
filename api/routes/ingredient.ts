@@ -1,6 +1,8 @@
 import express from "express";
 import {
   getAllIngredients,
+  getAllIngredientsForReport,
+  getIngredientForRecipe,
   getIngredientById,
   createIngredient,
   editIngredient,
@@ -13,11 +15,12 @@ import {
   updateCategoryIngredient,
   deleteCategoryIngredient,
 } from "../controllers/category-ingredient";
-import { verifyToken } from "../../middlewares/verify-token";
 const route = express.Router();
 
 // ingredients
 route.get("/api/ingredients/all", getAllIngredients);
+route.get("/api/ingredients/all/report", getAllIngredientsForReport);
+route.get("/api/ingredients/all/recipe", getIngredientForRecipe);
 route.post("/api/ingredient/get/:id", getIngredientById);
 route.post("/api/ingredient/create", createIngredient);
 route.patch("/api/ingredient/update/:id", editIngredient);

@@ -121,6 +121,7 @@ export const fetchReportShiftToday = async (req: Request, res: Response) => {
 
   const endDay = new Date(today);
   endDay.setUTCHours(23, 59, 59, 999);
+
   try {
     const result = await prisma.report_stock.findFirst({
       where: {
@@ -151,25 +152,27 @@ export const fetchReportShiftToday = async (req: Request, res: Response) => {
 export const createReportStockShift1 = async (req: Request, res: Response) => {
   const { reporter, values, grand_total, date } = req.body;
 
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      name: reporter,
-    },
-  });
-
-  if (!existingUser) {
-    return res.status(404).json({
-      message: "Akun pengguna tidak ditemukan",
-    });
-  }
   try {
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        name: reporter,
+      },
+    });
+  
+    if (!existingUser) {
+      return res.status(404).json({
+        message: "Akun pengguna tidak ditemukan",
+      });
+    }
+    
     await prisma.report_stock.create({
       data: {
         grand_total: grand_total,
         report_date: date,
         report_shift_1: {
           create: {
-            reporter: existingUser.id,
+            reporter: existingUser.name,
             values: values,
           },
         },
@@ -222,7 +225,7 @@ export const createReportStockShift2 = async (req: Request, res: Response) => {
         report_shift_2: {
           create: {
             values,
-            reporter: existingUser.id,
+            reporter: existingUser.name,
           },
         },
         grand_total: {

@@ -9,6 +9,8 @@ import userRoute from "./api/routes/user";
 import productRoute from "./api/routes/product";
 import ingredientRoute from "./api/routes/ingredient";
 import reportRoute from "./api/routes/report";
+import recipeRoute from "./api/routes/recipe";
+
 dotenv.config();
 
 process.env.TZ = 'Asia/Jakarta';
@@ -19,16 +21,16 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: process.env.APPLICATION_URL,
+    origin: [`${process.env.APPLICATION_URL}`, 'http://112.0.5615.136:8080', 'http://192.168.1.11:3000'],
     credentials: true,
   })
 );
-
 app.use(authRoute);
 app.use(userRoute);
 app.use(productRoute);
 app.use(ingredientRoute);
 app.use(reportRoute);
+app.use(recipeRoute);
 
 bindFlmngr({
   app: app,
