@@ -10,6 +10,7 @@ import productRoute from "./api/routes/product";
 import ingredientRoute from "./api/routes/ingredient";
 import reportRoute from "./api/routes/report";
 import recipeRoute from "./api/routes/recipe";
+import summaryRoute from "./api/routes/summary";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use(productRoute);
 app.use(ingredientRoute);
 app.use(reportRoute);
 app.use(recipeRoute);
+app.use(summaryRoute);
 
 bindFlmngr({
   app: app,
