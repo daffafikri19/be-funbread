@@ -17,6 +17,76 @@ export const getAllUserRole = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllUserAndRole = async (req: Request, res: Response) => {
+  const { skip, take, search } = req.query;
+
+  let filter: any = {}
+  try {
+
+    if (search && search !== "") {
+      filter = {
+        ...filter,
+        OR: [{ name: { contains: search } }],
+      };
+    }
+
+    const result = await prisma.user_role.findMany({
+      include: {
+        user: true,
+      },
+      where: filter,
+      take: Number(take),
+      skip: Number(skip)
+    });
+
+    const totalData = await prisma.user_role.count();
+
+    return res.status(200).json({
+      message: "Berhasil fetch",
+      data: {
+        result: result,
+        metadata: {
+          hasNextPage: Number(skip) + Number(take) < totalData,
+          totalPages: Math.ceil(totalData / Number(take)),
+          totalData: totalData,
+        },
+      },
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
+    });
+  }
+}
+
+export const getRoleById = async (req: Request, res: Response) => {
+  const { id } = req.body;
+  try {
+    const result = await prisma.user_role.findUnique({
+      where: {
+        id: id
+      },
+    });
+
+    if(!result) {
+      return res.status(404).json({
+        message: "Role tidak ditemukan"
+      })
+    }
+
+    return res.status(200).json({
+      message: "berhasil fetch",
+      data: result
+    })
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
+    });
+  }
+}
+
 export const createNewRole = async (req: Request, res: Response) => {
   const { name } = req.body;
   try {

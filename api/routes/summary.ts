@@ -10,6 +10,6 @@ const route = express.Router();
 route.get("/api/summary/total-sales-shift", totalSalesShiftSummary);
 route.get("/api/summary/top-selling-product", topSellingProduct);
 route.get("/api/summary/sales-period", periodedSalesSummary);
-route.get("/api/summary/top-data-report", current5ReportData);
+route.get("/api/summary/current-report-data", current5ReportData);
 
 export default route;

@@ -11,6 +11,7 @@ import ingredientRoute from "./api/routes/ingredient";
 import reportRoute from "./api/routes/report";
 import recipeRoute from "./api/routes/recipe";
 import summaryRoute from "./api/routes/summary";
+import accessRoute from "./api/routes/access";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use(ingredientRoute);
 app.use(reportRoute);
 app.use(recipeRoute);
 app.use(summaryRoute);
+app.use(accessRoute);
 
 bindFlmngr({
   app: app,

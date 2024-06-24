@@ -1,5 +1,8 @@
 import { Response, Request } from "express";
 import { prisma } from "../../../lib/prisma";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+
 
 export const getAllUser = async (req: Request, res: Response) => {
   const { skip, take, search } = req.query;
@@ -88,8 +91,8 @@ export const findUserByID = async (req: Request, res: Response) => {
   }
 };
 
-export const editUserAccount = async (req: Request, res: Response) => {
-  const { id, name, email, profile_picture, role, shift } = req.body;
+export const editUserAccountByOwner = async (req: Request, res: Response) => {
+  const { id, name, email, role, shift } = req.body;
 
   try {
 
@@ -121,10 +124,17 @@ export const editUserAccount = async (req: Request, res: Response) => {
       where: {
         id: existingUser.id,
       },
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
       data: {
         name,
         email,
-        profile_picture,
         shift,
         role: {
           connect: {
@@ -133,9 +143,9 @@ export const editUserAccount = async (req: Request, res: Response) => {
         },
       },
     });
-    
+
     return res.status(200).json({
-      message: "Berhasil update akun",
+      message: `Berhasil edit akun`,
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -144,6 +154,63 @@ export const editUserAccount = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const updateUserData = async (req:   Request, res: Response) => {
+  const { name, email, profile_picture, password, confPassword } = req.body;
+  try {
+
+    const existingUserData = await prisma.user.findUnique({
+      where: {
+        email: email
+      }
+    });
+    if(!existingUserData) {
+      return res.status(404).json({
+        message: "Email tidak ditemukan"
+      })
+    }
+
+    const matchPassword = password === confPassword;
+
+    if(!matchPassword) {
+      return res.status(400).json({
+        message: "Password dengan konfirmasi password tidak cocok"
+      })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(password, salt)
+
+    const user = await prisma.user.update({
+      where: {
+        id: existingUserData.id
+      },
+      data: {
+        name,
+        profile_picture,
+        password: hashPassword
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profile_picture: true,
+        shift: true,
+        role: true
+      }
+    });
+
+    return res.status(200).json({
+      message: "Berhasil update data akun pribadi",
+      data: user
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
+    });
+  }
+}
 
 export const deleteUserAccount = async (req: Request, res: Response) => {
   const { id } = req.body;

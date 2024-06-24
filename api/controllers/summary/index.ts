@@ -332,6 +332,7 @@ export const current5ReportData = async (req: Request, res: Response) => {
       orderBy: {
         report_date: "desc",
       },
+      take: 5,
     });
 
     const reportSales = await prisma.report_sales.findMany({
@@ -343,6 +344,7 @@ export const current5ReportData = async (req: Request, res: Response) => {
       orderBy: {
         report_date: "desc",
       },
+      take: 5
     });
 
     const reportIngredient = await prisma.report_ingredient.findMany({
@@ -354,12 +356,13 @@ export const current5ReportData = async (req: Request, res: Response) => {
       orderBy: {
         report_date: "desc",
       },
+      take: 5
     });
 
     const result = {
-      report_stock: reportStock.slice(0, 5),
-      report_sales: reportSales.slice(0, 5),
-      report_ingredients: reportIngredient.slice(0, 5),
+      report_stock: reportStock,
+      report_sales: reportSales,
+      report_ingredients: reportIngredient,
     };
 
     return res.status(200).json({
