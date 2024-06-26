@@ -17,6 +17,32 @@ export const getAllUserRole = async (req: Request, res: Response) => {
   }
 };
 
+export const getRoleByName = async (req: Request, res: Response) => {
+  const { rolename } = req.body;
+  try {
+    const existingRole = await prisma.user_role.findFirst({
+      where: {
+        name: rolename
+      }
+    });
+    if(!existingRole) {
+      return res.status(404).json({
+        message: "Role tidak ditemukan"
+      })
+    }
+
+    return res.status(200).json({
+      message: "Berhasil fetch",
+      data: existingRole
+    })
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error",
+      errorMessage: error.message,
+    });
+  }
+}
+
 export const getAllUserAndRole = async (req: Request, res: Response) => {
   const { skip, take, search } = req.query;
 

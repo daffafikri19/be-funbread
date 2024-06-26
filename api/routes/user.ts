@@ -10,6 +10,7 @@ import {
   getAllUserRole,
   getAllUserAndRole,
   getRoleById,
+  getRoleByName,
   createNewRole,
   editRole,
   deleteRole,
@@ -29,6 +30,7 @@ route.post("/api/user/delete/:id", deleteUserAccount);
 route.get("/api/user/role/all", getAllUserRole);
 route.get("/api/user/role/data", getAllUserAndRole);
 route.post("/api/user/role/get/:id", getRoleById);
+route.post("/api/user/role/name", getRoleByName);
 route.post("/api/user/role", createNewRole);
 route.patch("/api/user/role/update/:id", editRole);
 route.post("/api/user/role/delete/:id", deleteRole);
