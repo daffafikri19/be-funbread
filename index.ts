@@ -23,7 +23,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: ["https://admin.funbread.my.id"],
+    origin: ["http://localhost:3000"],
     credentials: true,
   })
 );
