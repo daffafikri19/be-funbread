@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import { prisma } from "../../../lib/prisma";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 
 export const getAllUser = async (req: Request, res: Response) => {

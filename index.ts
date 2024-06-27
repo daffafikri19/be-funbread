@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -23,7 +23,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: [`${process.env.APPLICATION_URL}`, 'http://112.0.5615.136:8080', 'http://192.168.1.11:3000'],
+    origin: ["https://admin.funbread.my.id"],
     credentials: true,
   })
 );
@@ -41,6 +41,10 @@ bindFlmngr({
   urlFileManager: "/flmngr",
   urlFiles: "/files/",
   dirFiles: "./files",
+});
+
+app.get('/', async (req: Request, res: Response) => {
+  res.send("Application running...");
 });
 
 app.listen(5000, () => {
